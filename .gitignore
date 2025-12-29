@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+build/
+dist/
+*.egg-info/
+
+# Vector DB
+backend/chroma_db/
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+.eslintcache
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
