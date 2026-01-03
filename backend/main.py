@@ -4,7 +4,10 @@ from typing import List
 import os
 import shutil
 from utils.text_processor import extract_text
-from utils.vector_store import get_vector_store, add_assignment, search_similar
+from utils.vector_store import get_vector_store, add_assignment
+from utils.llm import get_llm
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 import uuid
 
 app = FastAPI(title="Plagiarism Checker AI")
@@ -19,7 +22,7 @@ app.add_middleware(
 )
 
 # Initialize Vector Store
-collection = get_vector_store()
+vector_store = get_vector_store()
 
 @app.get("/")
 async def root():
@@ -39,7 +42,7 @@ async def upload_assignments(files: List[UploadFile] = File(...)):
             student_id = file.filename.split('.')[0]
             
             # Store in ChromaDB
-            add_assignment(collection, student_id, file.filename, text)
+            add_assignment(vector_store, student_id, file.filename, text)
             
             results.append({
                 "filename": file.filename,
@@ -60,7 +63,9 @@ async def analyze_class():
     """Generates a similarity heatmap for all processed assignments."""
     try:
         # Get all documents from collection
-        all_docs = collection.get()
+        # Access the underlying Chroma collection for raw operations
+        raw_collection = vector_store._collection
+        all_docs = raw_collection.get()
         ids = all_docs['ids']
         documents = all_docs['documents']
         metadatas = all_docs['metadatas']
@@ -70,7 +75,7 @@ async def analyze_class():
         
         # Compare each document against all others
         for i in range(n):
-            query_results = collection.query(
+            query_results = raw_collection.query(
                 query_texts=[documents[i]],
                 n_results=n
             )
@@ -92,6 +97,77 @@ async def analyze_class():
             "heatmap": heatmap_data
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+from pydantic import BaseModel
+
+class CompareRequest(BaseModel):
+    file1: str
+    file2: str
+
+@app.post("/compare")
+async def compare_assignments(file1: str, file2: str):
+    """
+    Compares two specific assignments using the LLM.
+    """
+    try:
+        print(f"DEBUG: Comparing '{file1}' and '{file2}'")
+        
+        # Retrieve documents by student_id (since frontend sends student_id)
+        doc1_res = vector_store.get(where={"student_id": file1})
+        doc2_res = vector_store.get(where={"student_id": file2})
+        
+        print(f"DEBUG: Doc1 found: {bool(doc1_res['documents'])}")
+        print(f"DEBUG: Doc2 found: {bool(doc2_res['documents'])}")
+        
+        if not doc1_res['documents'] or not doc2_res['documents']:
+            print("ERROR: One or both files not found in vector store.")
+            raise HTTPException(status_code=404, detail="One or both files not found.")
+            
+        text1 = doc1_res['documents'][0]
+        text2 = doc2_res['documents'][0]
+        
+        # Use LLM to compare
+        try:
+            llm = get_llm()
+            print("DEBUG: LLM initialized")
+        except Exception as e:
+            print(f"ERROR: LLM initialization failed: {e}")
+            raise HTTPException(status_code=500, detail=f"LLM Config Error: {str(e)}")
+        
+        prompt = PromptTemplate.from_template(
+            """
+            You are a plagiarism detection expert. Compare the following two texts and explain the similarities and differences.
+            
+            Text 1 ({file1}):
+            {text1}
+            
+            Text 2 ({file2}):
+            {text2}
+            
+            Analyze the structure, vocabulary, and flow. Are they independent works or is one derived from the other?
+            Provide a similarity score (0-100) and a justification.
+            """
+        )
+        
+        chain = prompt | llm | StrOutputParser()
+        
+        print("DEBUG: Invoking LLM chain...")
+        # Truncate text to fit context window (approx 2000 chars each for safety)
+        result = chain.invoke({
+            "file1": file1, 
+            "text1": text1[:4000], 
+            "file2": file2, 
+            "text2": text2[:4000]
+        })
+        print("DEBUG: LLM response received")
+        
+        return {"analysis": result}
+        
+    except Exception as e:
+        print(f"CRITICAL ERROR in /compare: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/clear-db")
