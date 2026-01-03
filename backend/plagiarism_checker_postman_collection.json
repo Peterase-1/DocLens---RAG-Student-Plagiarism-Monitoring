@@ -1,0 +1,152 @@
+{
+  "info": {
+    "_postman_id": "c3d6d739-0c68-4b6a-b907-3bced9fd3616",
+    "name": "Plagiarism Checker AI",
+    "description": "Collection to test the Plagiarism Checker API endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload Assignments",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "files",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "files",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/upload",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "upload"
+          ]
+        },
+        "description": "Upload one or more PDF/DOCX/TXT files."
+      },
+      "response": []
+    },
+    {
+      "name": "Analyze (Heatmap)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/analyze",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "analyze"
+          ]
+        },
+        "description": "Get the similarity heatmap for all uploaded documents."
+      },
+      "response": []
+    },
+    {
+      "name": "Compare Two Files (LLM)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/compare?file1=student1.txt&file2=student2.txt",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "compare"
+          ],
+          "query": [
+            {
+              "key": "file1",
+              "value": "student1.txt",
+              "description": "Filename of the first document"
+            },
+            {
+              "key": "file2",
+              "value": "student2.txt",
+              "description": "Filename of the second document"
+            }
+          ]
+        },
+        "description": "Uses the LLM to compare two specific files by filename."
+      },
+      "response": []
+    },
+    {
+      "name": "Clear Database",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/clear-db",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "clear-db"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    }
+  ]
+}
