@@ -15,7 +15,7 @@ def get_llm():
     
     llm = ChatOpenAI(
         base_url="https://openrouter.ai/api/v1",
-        openai_api_key="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",
+        openai_api_key=api_key,
         model="google/gemini-2.0-flash-exp:free", # Free high-quality model
         temperature=0.7,
         max_tokens=1024
