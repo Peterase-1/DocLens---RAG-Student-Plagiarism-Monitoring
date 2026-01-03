@@ -1,15 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
 
 :root {
   font-family: 'Outfit', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark light;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  color-scheme: dark;
+  color: #ffffff;
+  background-color: #000000;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -22,6 +21,7 @@ body {
   display: flex;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #000000;
 }
 
 #root {
@@ -29,14 +29,19 @@ body {
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(255, 255, 255, 0.03);
+  /* Extremely subtle white */
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  /* slightly sharper */
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  background: white;
+  /* Solid white for minimalism */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: white;
+  /* Fallback */
 }
